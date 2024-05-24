@@ -113,6 +113,7 @@ FLOWS = {
         "dexcom",
         "dialogflow",
         "directv",
+        "dirigera",
         "discord",
         "discovergy",
         "dlink",

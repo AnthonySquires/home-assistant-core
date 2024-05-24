@@ -561,6 +561,14 @@ ZEROCONF = {
             "domain": "homewizard",
         },
     ],
+    "_ihsp._tcp.local.": [
+        {
+            "domain": "dirigera",
+            "properties": {
+                "type": "dirigera",
+            },
+        },
+    ],
     "_ipp._tcp.local.": [
         {
             "domain": "ipp",

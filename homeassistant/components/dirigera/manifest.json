@@ -1,0 +1,20 @@
+{
+  "domain": "dirigera",
+  "name": "IKEA DIRIGERA",
+  "codeowners": ["@AnthonySquires"],
+  "config_flow": true,
+  "dependencies": [],
+  "documentation": "https://www.home-assistant.io/integrations/dirigera",
+  "homekit": {},
+  "iot_class": "local_push",
+  "requirements": ["dirigera==1.1.7"],
+  "ssdp": [],
+  "zeroconf": [
+    {
+      "type": "_ihsp._tcp.local.",
+      "properties": {
+        "type": "dirigera"
+      }
+    }
+  ]
+}
