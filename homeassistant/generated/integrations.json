@@ -1221,12 +1221,6 @@
       "config_flow": true,
       "iot_class": "local_polling"
     },
-    "dirigera": {
-      "name": "IKEA DIRIGERA",
-      "integration_type": "hub",
-      "config_flow": true,
-      "iot_class": "local_push"
-    },
     "discogs": {
       "name": "Discogs",
       "integration_type": "hub",
@@ -2785,6 +2779,12 @@
           "config_flow": true,
           "iot_class": "local_push",
           "name": "IKEA Idasen Desk"
+        },
+        "dirigera": {
+          "integration_type": "hub",
+          "config_flow": true,
+          "iot_class": "local_push",
+          "name": "IKEA DIRIGERA"
         }
       }
     },

@@ -2,29 +2,16 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
 import logging
 
-import dirigera
+from homeassistant.const import CONF_HOST, CONF_TOKEN, EVENT_HOMEASSISTANT_STOP
+from homeassistant.core import Event, HomeAssistant
 
-from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import CONF_TOKEN, Platform
-from homeassistant.core import HomeAssistant
-
-# Lets only support open/close sensors for now
-PLATFORMS: list[Platform] = [Platform.BINARY_SENSOR]
+from .const import PLATFORMS
+from .hub import AsyncHub
+from .models import DirigeraConfigEntry, DirigeraData
 
 _LOGGER = logging.getLogger(__name__)
-
-
-@dataclass
-class DirigeraData:
-    """data for dirigera hub integration."""
-
-    hub: dirigera.Hub
-
-
-type DirigeraConfigEntry = ConfigEntry[DirigeraData]  # noqa: F821
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: DirigeraConfigEntry) -> bool:
@@ -32,18 +19,28 @@ async def async_setup_entry(hass: HomeAssistant, entry: DirigeraConfigEntry) -> 
 
     _LOGGER.debug("setup lets go! %s", entry.data)
 
+    if not (hub_host := entry.data[CONF_HOST]):
+        return False
+
     if not (hub_token := entry.data[CONF_TOKEN]):
         return False
 
-    _LOGGER.debug("token: %s", hub_token)
+    async_hub = AsyncHub(hass, entry, hub_host, hub_token)
 
-    # TODOX 1. Create API instance
-    # TODOX 2. Validate the API connection (and authentication)
-    # TODOX 3. Store an API object for your platforms to access
-    # entry.runtime_data = MyAPI(...)
+    async def on_hass_stop(event: Event) -> None:
+        """Close connection when hass stops."""
+        await async_hub.stop_event_listener()
 
-    await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
+    # Setup listeners
+    entry.async_on_unload(
+        hass.bus.async_listen_once(EVENT_HOMEASSISTANT_STOP, on_hass_stop)
+    )
 
+    entry.runtime_data = DirigeraData(
+        hub=async_hub,
+    )
+
+    await async_hub.start_event_listener()
     return True
 
 

@@ -38,19 +38,19 @@ class DirigeraConfigFlow(ConfigFlow, domain=DOMAIN):
     ) -> ConfigFlowResult:
         """Handle zeroconf discovery."""
         await self.async_set_unique_id(discovery_info.properties[MDNS_ATTR_UUID])
-        self._abort_if_unique_id_configured({CONF_HOST: discovery_info.host})
-
-        # session = async_get_clientsession(self.hass)
-        # air_gradient = AirGradientClient(host, session=session)
-        # await air_gradient.get_current_measures()
+        self._abort_if_unique_id_configured(
+            {CONF_HOST: discovery_info.properties[MDNS_ATTR_IPV4]}
+        )
 
         self.data[CONF_HOST] = discovery_info.properties[MDNS_ATTR_IPV4]
         self.data[CONF_MODEL] = discovery_info.properties[MDNS_ATTR_HOSTNAME][-6:]
         self.data[CONF_UUID] = discovery_info.properties[MDNS_ATTR_UUID]
 
+        _LOGGER.debug("discovered gateway %s", self.data)
+
         self.context.update(
             {
-                "host": discovery_info.host,
+                "host": self.data[CONF_HOST],
                 "title_placeholders": {"model": self.data[CONF_MODEL]},
             }
         )
@@ -61,11 +61,7 @@ class DirigeraConfigFlow(ConfigFlow, domain=DOMAIN):
     ) -> ConfigFlowResult:
         """Confirm discovery."""
         if user_input is not None:
-            _LOGGER.debug("yo %s", user_input)
-
             return await self.async_step_pair_action()
-
-            #
 
         return self.async_show_form(
             step_id="discovery_confirm",
@@ -87,8 +83,6 @@ class DirigeraConfigFlow(ConfigFlow, domain=DOMAIN):
         self.pair_code = await self.hass.async_add_executor_job(
             send_challenge, host, self.pair_code_verifier
         )
-
-        _LOGGER.debug("code: %s", self.pair_code)
 
         self._set_confirm_only()
         return self.async_show_form(
